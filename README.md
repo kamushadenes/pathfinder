@@ -10,6 +10,14 @@ You can use keywords (`TagMap`) or embed arbitrary data with the included `packe
 
 See the example on [cmd/pathfinder](https://github.com/kamushadenes/pathfinder/cmd/pathfinder/main.go)
 
+### Usage
+
+`./pathfinder <CUE>`
+
+### Example
+
+![example](example.png)
+
 ### Prerequisites
 
 - Go 1.10

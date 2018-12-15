@@ -80,6 +80,7 @@ func worker(jobChan <-chan Path) {
 		Logger.WithFields(GetLogFields(logrus.Fields{
 			"time":            job.Time,
 			"origin":          job.Origin,
+			"fullText":        job.FullText,
 			"decodedEntities": job.DecodedEntities,
 		})).Info("message received")
 
