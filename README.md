@@ -2,9 +2,19 @@
 
 This program is a Pathfinder.
 
-What this means is that it's going to listen for messages hidden in several different sources.
+What this means is that it's going to listen for messages hidden in several different sources, and maybe act upon them.
+
+This can be useful to bypass censorship, or maybe something else.
 
 You can use keywords (`TagMap`) or embed arbitrary data with the included `packer` util.
+
+# Disclaimer
+
+This project is meant for *EDUCATIONAL PURPOSES ONLY*.
+
+Don't use it for illegal activities.
+
+You are the sole responsible for your actions.
 
 ## Getting Started
 
@@ -61,6 +71,15 @@ TWITTER_CONSUMER_SECRET=xxxx
 TWITTER_ACCESS_TOKEN=xxx
 TWITTER_ACCESS_SECRET=xxx
 ```
+
+## Roadmap
+
+- Instagram
+- Facebook
+- YouTube
+- Pinterest
+- Pastebin
+- ???
 
 ## Contributing
 
