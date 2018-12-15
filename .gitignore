@@ -1,0 +1,4 @@
+.env
+.idea
+cmd/pathfinder/pathfinder
+cmd/pathfinder/utils/packer/packer
