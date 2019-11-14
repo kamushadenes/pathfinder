@@ -44,7 +44,7 @@ func NewTwitter() (*Twitter, error) {
 	return &t, nil
 }
 
-func (t Twitter) GetName() string {
+func (t *Twitter) GetName() string {
 	return "twitter"
 }
 
@@ -52,11 +52,11 @@ func (t *Twitter) FindPath() *Path {
 	return nil
 }
 
-func (t Twitter) GetMaxPayloadSize() int {
+func (t *Twitter) GetMaxPayloadSize() int {
 	return twitterMaxSize - len(t.prefix) - len(t.suffix)
 }
 
-func (t Twitter) GetPrefix() string {
+func (t *Twitter) GetPrefix() string {
 	return t.prefix
 }
 
@@ -70,7 +70,7 @@ func (t *Twitter) SetPrefix(s string) error {
 	}
 }
 
-func (t Twitter) GetSuffix() string {
+func (t *Twitter) GetSuffix() string {
 	return t.suffix
 }
 
@@ -84,7 +84,7 @@ func (t *Twitter) SetSuffix(s string) error {
 	}
 }
 
-func (t Twitter) GetCue() string {
+func (t *Twitter) GetCue() string {
 	return t.cue
 }
 
@@ -95,7 +95,7 @@ func (t *Twitter) SetCue(s string) error {
 
 func (t *Twitter) Start() {
 	params := &twitter.StreamFilterParams{
-		Track:         []string{t.cue},
+		Track:         []string{t.GetCue()},
 		StallWarnings: twitter.Bool(true),
 	}
 	stream, err := t.client.Streams.Filter(params)
@@ -105,6 +105,8 @@ func (t *Twitter) Start() {
 			"origin": t.GetName(),
 			"error":  err.Error(),
 		})).Error("failed to start origin")
+
+		return
 	}
 
 	demux := twitter.NewSwitchDemux()
@@ -143,7 +145,7 @@ func (t *Twitter) Start() {
 	wg.Done()
 }
 
-func init() {
+func StartTwitter() {
 	t, err := NewTwitter()
 
 	if err != nil {
@@ -151,9 +153,11 @@ func init() {
 			"origin": t.GetName(),
 			"error":  err.Error(),
 		})).Error("failed to start origin")
+
+		return
 	}
 
-	t.cue = os.Args[1]
+	_ = t.SetCue(config.Pathfinder.Path.Cue)
 
 	origins = append(origins, t)
 }

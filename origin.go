@@ -20,7 +20,7 @@ type Path struct {
 	Time            *time.Time
 	FullText        string
 	MatchText       string
-	DecodedEntities []string
+	DecodedEntities []ConfigTag
 	Metadata        map[string]string
 }
 

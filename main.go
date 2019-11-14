@@ -9,12 +9,7 @@ import (
 
 var Handle func(p Path)
 
-var RegPrefix = defaultPrefix
-var RegSuffix = defaultSuffix
-
-var TagMap = make(map[string]string)
-var TagSep = " "
-var TagTrim = "#"
+var config *Config
 
 func HandleArbitrary(job Path) (Path, error) {
 	re := regexp.MustCompile(fmt.Sprintf("%s(.*?)%s", job.OriginPrefix, job.OriginSuffix))
@@ -32,29 +27,33 @@ func HandleArbitrary(job Path) (Path, error) {
 
 	job.MatchText = match[1]
 
-	text, err := DecodeString(job.MatchText)
-	if err != nil {
-		Logger.WithFields(GetLogFields(logrus.Fields{
-			"time":      job.Time,
-			"origin":    job.Origin,
-			"fullText":  job.FullText,
-			"matchText": job.MatchText,
-		})).Error("failed to decode text")
-		return job, NewDecodeFailed()
-	} else {
-		job.DecodedEntities = append(job.DecodedEntities, text)
-	}
+	/*
+		text, err := DecodeString(job.MatchText)
+		if err != nil {
+			Logger.WithFields(GetLogFields(logrus.Fields{
+				"time":      job.Time,
+				"origin":    job.Origin,
+				"fullText":  job.FullText,
+				"matchText": job.MatchText,
+			})).Error("failed to decode text")
+			return job, NewDecodeFailed()
+		} else {
+			job.DecodedEntities = append(job.DecodedEntities, text)
+		}*/
 
 	return job, nil
 }
 
 func HandleTagged(job Path) (Path, error) {
-	tags := strings.Split(job.FullText, TagSep)
+	tags := strings.Split(job.FullText, config.Pathfinder.TagMap.Separator)
 
 	for _, tag := range tags {
-		tag = strings.Trim(tag, TagTrim)
-		if _, ok := TagMap[tag]; ok {
-			job.DecodedEntities = append(job.DecodedEntities, TagMap[tag])
+		tag = strings.Trim(tag, config.Pathfinder.TagMap.Trim)
+
+		for k := range config.Pathfinder.TagMap.Tags {
+			if config.Pathfinder.TagMap.Tags[k].Tag == tag {
+				job.DecodedEntities = append(job.DecodedEntities, config.Pathfinder.TagMap.Tags[k])
+			}
 		}
 	}
 	return job, nil
@@ -77,12 +76,12 @@ func worker(jobChan <-chan Path) {
 			}
 		}
 
-		Logger.WithFields(GetLogFields(logrus.Fields{
+		/*Logger.WithFields(GetLogFields(logrus.Fields{
 			"time":            job.Time,
 			"origin":          job.Origin,
 			"fullText":        job.FullText,
 			"decodedEntities": job.DecodedEntities,
-		})).Info("message received")
+		})).Info("message received")*/
 
 		Handle(job)
 	}
@@ -90,15 +89,21 @@ func worker(jobChan <-chan Path) {
 
 var pathChan = make(chan Path, 100)
 
-func Run(cue string) {
+func Run(cnf *Config) {
 	go worker(pathChan)
+
+	config = cnf
+
+	if _, ok := config.Pathfinder.Origins["twitter"]; ok {
+		StartTwitter()
+	}
 
 	for k := range origins {
 		Logger.WithFields(GetLogFields(logrus.Fields{
 			"origin": origins[k].GetName(),
 		})).Info("starting origin")
 
-		err := origins[k].SetPrefix(RegPrefix)
+		err := origins[k].SetPrefix(config.Pathfinder.Path.Prefix)
 		if err != nil {
 			Logger.WithFields(GetLogFields(logrus.Fields{
 				"origin": origins[k].GetName(),
@@ -106,7 +111,7 @@ func Run(cue string) {
 			})).Error("failed to initialize origin")
 			continue
 		}
-		err = origins[k].SetSuffix(RegSuffix)
+		err = origins[k].SetSuffix(config.Pathfinder.Path.Suffix)
 		if err != nil {
 			Logger.WithFields(GetLogFields(logrus.Fields{
 				"origin": origins[k].GetName(),
@@ -114,7 +119,7 @@ func Run(cue string) {
 			})).Error("failed to initialize origin")
 			continue
 		}
-		err = origins[k].SetCue(cue)
+		err = origins[k].SetCue(config.Pathfinder.Path.Cue)
 		if err != nil {
 			Logger.WithFields(GetLogFields(logrus.Fields{
 				"origin": origins[k].GetName(),

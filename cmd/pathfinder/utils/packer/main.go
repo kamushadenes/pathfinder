@@ -15,7 +15,6 @@ func main() {
 			s, err := pathfinder.EncodeString(strings.Join(os.Args[2:], " "))
 			if err != nil {
 				log.Fatal(err.Error())
-				os.Exit(1)
 			}
 
 			fmt.Println(s)
@@ -25,7 +24,6 @@ func main() {
 			s, err := pathfinder.DecodeString(os.Args[2])
 			if err != nil {
 				log.Fatal(err.Error())
-				os.Exit(1)
 			}
 
 			fmt.Println(s)

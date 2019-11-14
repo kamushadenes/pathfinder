@@ -2,23 +2,50 @@ package main
 
 import (
 	"fmt"
+	"github.com/google/shlex"
 	"github.com/kamushadenes/pathfinder"
-	"os"
+	"github.com/sirupsen/logrus"
+	"io/ioutil"
+	"log"
+	"os/exec"
 )
 
 func Handle(p pathfinder.Path) {
-	fmt.Printf("command received: %s\n", p.DecodedEntities)
+	for k := range p.DecodedEntities {
+		en := p.DecodedEntities[k]
+
+		switch en.Type {
+		case "command":
+			pathfinder.Logger.WithFields(pathfinder.GetLogFields(logrus.Fields{
+				"time":            p.Time,
+				"origin":          p.Origin,
+				"fullText":        p.FullText,
+				"decodedEntities": p.DecodedEntities,
+				"command":         fmt.Sprintf("%s = %s\n", en.Tag, en.Value),
+			})).Info("message received")
+
+			c, err := shlex.Split(en.Value)
+
+			if err == nil {
+				cmd := exec.Command(c[0], c[1:]...)
+				_ = cmd.Run()
+			}
+
+			break
+		}
+	}
 }
 
 func main() {
 	pathfinder.Handle = Handle
 
-	pathfinder.RegPrefix = "HYX"
-	pathfinder.RegSuffix = "XYH"
+	data, err := ioutil.ReadFile("config.yaml")
 
-	pathfinder.TagMap["potato"] = "shutdown -h now"
-
-	if len(os.Args) >= 2 {
-		pathfinder.Run(os.Args[1])
+	if err != nil {
+		log.Fatal(err.Error())
 	}
+
+	config, err := pathfinder.ReadConfig(data)
+
+	pathfinder.Run(config)
 }

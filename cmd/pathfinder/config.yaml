@@ -1,0 +1,17 @@
+pathfinder:
+  origins:
+    twitter:
+      enabled: true
+
+  path:
+    cue: "potato"
+    prefix: "HYX"
+    suffix: "XYH"
+
+  tagmap:
+    separator: " "
+    trim: "#"
+    tags:
+      - tag: "potato"
+        type: "command"
+        value: "zenity --info --text BATATA"
