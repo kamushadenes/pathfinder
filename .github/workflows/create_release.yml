@@ -1,6 +1,6 @@
 name: Create Release
 
-on: push
+on: [push, pull_request]
 
 jobs:
   build:
@@ -54,7 +54,7 @@ jobs:
           CGO_ENABLED: 0
 
       - uses: actions/upload-artifact@v1
-        with:main
+        with:
           name: pathfinder_linux_amd64
           path: pathfinder_linux_amd64
 
